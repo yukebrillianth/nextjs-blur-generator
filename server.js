@@ -54,7 +54,7 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
     // Resize gambar
     const { data, info } = await sharp(imagePath)
-      .resize(300, 400)
+      .resize(width, height)
       .ensureAlpha()
       .raw()
       .toBuffer({
