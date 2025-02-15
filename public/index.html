@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Base64 BlurHash Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-6">Image to Base64 BlurHash Generator</h1>
+
+        <form id="uploadForm" class="mb-6">
+            <div class="mb-4">
+                <label for="imageUpload" class="block text-sm font-medium text-gray-700 mb-2">Upload Image</label>
+                <input type="file" id="imageUpload" name="image" accept="image/*" class="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100
+                ">
+            </div>
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                Generate BlurHash
+            </button>
+        </form>
+
+        <div class="flex flex-row gap-12">
+            <div id="preview" class="mb-6 hidden">
+                <h2 class="text-xl font-semibold mb-2">Original Image</h2>
+                <img id="originalImage" src="/placeholder.svg" alt="Original" class="max-w-full h-auto max-h-64 object-contain">
+            </div>
+
+            <div id="preview-result" class="mb-6 hidden ">
+                <h2 class="text-xl font-semibold mb-2">Processed Image</h2>
+                <img id="processedImage" src="/placeholder.svg" alt="Processed" class="max-w-full h-auto max-h-64 object-contain">
+            </div>
+
+        </div>
+
+        <div id="result" class="hidden">
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold">Result</h2>
+                <p><strong>Original Size:</strong> <span id="originalSize"></span></p>
+                <p><strong>Processed Size:</strong> <span id="processedSize"></span></p>
+                <div>
+                    <strong>Base64 URL:</strong>
+                    <textarea id="base64Url" class="w-full h-24 mt-2 p-2 border rounded" readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('uploadForm');
+            const imageUpload = document.getElementById('imageUpload');
+            const preview = document.getElementById('preview');
+            const originalImage = document.getElementById('originalImage');
+            const result = document.getElementById('result');
+            const previewResult = document.getElementById('preview-result');
+            const processedImage = document.getElementById('processedImage');
+            const originalSizeEl = document.getElementById('originalSize');
+            const processedSizeEl = document.getElementById('processedSize');
+            const base64UrlEl = document.getElementById('base64Url');
+
+            imageUpload.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    originalImage.src = URL.createObjectURL(file);
+                    preview.classList.remove('hidden');
+                }
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Server responded with an error');
+                    }
+
+                    const data = await response.json();
+
+                    processedImage.src = data.base64Url;
+                    originalSizeEl.textContent = data.originalSize;
+                    processedSizeEl.textContent = data.processedSize;
+                    base64UrlEl.value = data.base64Url;
+
+                    result.classList.remove('hidden');
+                    previewResult.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                    alert('An error occurred while processing the image. Please try again.');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
