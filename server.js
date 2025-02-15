@@ -41,8 +41,11 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
     const imagePath = req.file.path;
     const metadata = await sharp(imagePath).metadata();
-    const width = req.body?.width || 300;
-    const height = req.body?.height || 400;
+    let width = parseInt(req.body?.width, 10) || 300;
+    let height = parseInt(req.body?.height, 10) || 400;
+
+    if (isNaN(width) || width <= 0) width = 300;
+    if (isNaN(height) || height <= 0) height = 400;
 
     // Pastikan file benar-benar gambar
     if (!["jpeg", "png", "webp"].includes(metadata.format)) {
